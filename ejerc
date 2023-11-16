@@ -1,0 +1,128 @@
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import firebase from "./firebase";
+
+function RegistrationForm() {
+  const { register, handleSubmit, errors } = useForm();
+  const [message, setMessage] = useState("");
+
+  const onSubmit = (data) => {
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(data.email, data.password)
+      .then((userCredential) => {
+        var user = userCredential.user;
+        user
+          .updateProfile({
+            displayName: data.nombre + " " + data.apellido,
+          })
+          .then(() => {
+            setMessage("Usuario registrado con éxito");
+          })
+          .catch((error) => {
+            setMessage(error.message);
+          });
+      })
+      .catch((error) => {
+        setMessage(error.message);
+      });
+  };
+
+  return (
+    <div className="container">
+      <h1>Formulario de registro</h1>
+      {message && <div className="alert alert-info">{message}</div>}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="form-group">
+          <label htmlFor="nombre">Nombre</label>
+          <input
+            type="text"
+            className="form-control"
+            id="nombre"
+            name="nombre"
+            ref={register({ required: true })}
+          />
+          {errors.nombre && (
+            <div className="alert alert-danger">Este campo es obligatorio</div>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="apellido">Apellido</label>
+          <input
+            type="text"
+            className="form-control"
+            id="apellido"
+            name="apellido"
+            ref={register({ required: true })}
+          />
+          {errors.apellido && (
+            <div className="alert alert-danger">Este campo es obligatorio</div>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            className="form-control"
+            id="email"
+            name="email"
+            ref={register({ required: true })}
+          />
+          {errors.email && (
+            <div className="alert alert-danger">Este campo es obligatorio</div>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="telefono">Teléfono</label>
+          <input
+            type="tel"
+            className="form-control"
+            id="telefono"
+            name="telefono"
+            ref={register({ required: true })}
+          />
+          {errors.telefono && (
+            <div className="alert alert-danger">Este campo es obligatorio</div>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            className="form-control"
+            id="password"
+            name="password"
+            ref={register({ required: true })}
+          />
+          {errors.password && (
+            <div className="alert alert-danger">Este campo es obligatorio</div>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="confirmarPassword">Confirmar password</label>
+          <input
+            type="password"
+            className="form-control"
+            id="confirmarPassword"
+            name="confirmarPassword"
+            ref={register({
+              required: true,
+              validate: (value) =>
+                value === document.getElementById("password").value,
+            })}
+          />
+          {errors.confirmarPassword && (
+            <div className="alert alert-danger">
+              Este campo es obligatorio y debe coincidir con el password
+            </div>
+          )}
+        </div>
+        <button type="submit" className="btn btn-primary">
+          Registrarse
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default RegistrationForm;
